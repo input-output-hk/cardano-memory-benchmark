@@ -1,0 +1,13 @@
+#!/bin/sh
+
+lastResult=$(jq < result/refined.json .failed)
+
+if [ x$lastResult = xfalse ]; then
+  nix-store -r $(readlink ./result) --add-root pass --indirect
+  cp -f result/refined.json pass.json
+else
+  nix-store -r $(readlink ./result) --add-root fail --indirect
+  cp -f result/refined.json fail.json
+fi
+
+cat fail.json pass.json
