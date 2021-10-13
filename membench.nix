@@ -1,16 +1,11 @@
-{ runCommand, cardano-node, jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump, nodesrc, lib }:
+{ runCommand, cardano-node, jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump, nodesrc, lib, rtsflags, rtsMemSize }:
 
 let
-  params = builtins.fromJSON (builtins.readFile ./membench_params.json);
+  flags = "${rtsflags} ${lib.optionalString (rtsMemSize != null) "-M${rtsMemSize}"}";
   topology = { Producers = []; };
-  flags = params.rtsFlags;
   topologyPath = builtins.toFile "topology.json" (builtins.toJSON topology);
-  passMem = (builtins.fromJSON (builtins.readFile ./pass.json)).memSize;
-  failMem = (builtins.fromJSON (builtins.readFile ./fail.json)).memSize;
-  avgMem = (passMem+failMem) / 2;
   inVM = false;
   membench = runCommand "membench" {
-    memSize = if (params.memSize == "auto") then avgMem else params.memSize;
     buildInputs = [ cardano-node jq strace util-linux procps time ];
     succeedOnFailure = true;
   } ''
@@ -29,6 +24,8 @@ let
     cp -r ${snapshot}/chain chain
     chmod -R +w chain
 
+    echo ${flags}
+
     ls -ltrh chain
     jq '.setupScribes = [
         .setupScribes[0] * { "scFormat":"ScJson" },
@@ -46,7 +43,7 @@ let
       | .defaultScribes = .defaultScribes + [ [ "FileSK", "log.json" ] ]
       ' ${nodesrc}/configuration/cardano/mainnet-config.json > config.json
     cp -v ${nodesrc}/configuration/cardano/*-genesis.json .
-    command time -f %M -o $out/highwater cardano-node ${flags} run --database-path chain/ --config config.json --topology ${topologyPath} --shutdown-on-slot-synced 2000
+    command time -f %M -o $out/highwater cardano-node +RTS ${flags} -RTS run --database-path chain/ --config config.json --topology ${topologyPath} --shutdown-on-slot-synced 2000
     #sleep 600
     #kill -int $!
     pwd
@@ -56,7 +53,7 @@ let
     ls -ltrh chain/ledger/
     mv -vi log*json config.json $out/
     mv chain $out/
-    rm $out/nix-support/failed
+    rm $out/nix-support/failed || true
   '';
 in
 runCommand "membench-post-process" {
@@ -79,5 +76,5 @@ runCommand "membench-post-process" {
     export FAILED=false
   fi
 
-  jq --slurp < summary.json 'def minavgmax: length as $len | { min: (min/1024/1024), avg: ((add / $len)/1024/1024), max: (max/1024/1024) }; map(select(.ns[0] == "cardano.node.resources") | .data) | { RSS: map(.RSS) | minavgmax, Heap: map(.Heap) | minavgmax, CentiCpuMax: map(.CentiCpu) | max, CentiMutMax: map(.CentiMut) | max, CentiGC: map(.CentiGC) | max, CentiBlkIO: map(.CentiBlkIO) | max, flags: "${flags}", chain: { startSlot: ${toString snapshot.snapshotSlot}, stopFile: ${toString snapshot.finalEpoch} }, totaltime:'$totaltime', failed:'$FAILED', memSize: ${toString membench.memSize} }' > refined.json
+  jq --slurp < summary.json 'def minavgmax: length as $len | { min: (min/1024/1024), avg: ((add / $len)/1024/1024), max: (max/1024/1024) }; map(select(.ns[0] == "cardano.node.resources") | .data) | { RSS: map(.RSS) | minavgmax, Heap: map(.Heap) | minavgmax, CentiCpuMax: map(.CentiCpu) | max, CentiMutMax: map(.CentiMut) | max, CentiGC: map(.CentiGC) | max, CentiBlkIO: map(.CentiBlkIO) | max, flags: "${flags}", chain: { startSlot: ${toString snapshot.snapshotSlot}, stopFile: ${toString snapshot.finalEpoch} }, totaltime:'$totaltime', failed:'$FAILED' }' > refined.json
 ''

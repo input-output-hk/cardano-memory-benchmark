@@ -10,6 +10,9 @@
   };
   outputs = { ouroboros-network, self, cardano-node, nixpkgs, cardano-node2, mainnet-chain }: let
     network = import ouroboros-network { system = "x86_64-linux"; };
+    params = builtins.fromJSON (builtins.readFile ./membench_params.json);
+    rtsMemSize = null;
+    rtsflags = params.rtsFlags;
     overlay = self: super: {
       inherit mainnet-chain;
       nodesrc = cardano-node2;
@@ -17,7 +20,7 @@
       #db-analyser = network.haskellPackages.ouroboros-consensus-cardano.components.exes.db-analyser;
       db-analyser = cardano-node2.packages.x86_64-linux.db-analyser;
       snapshot = self.callPackage ./snapshot-generation.nix {};
-      membench = self.callPackage ./membench.nix {};
+      membench = self.callPackage ./membench.nix { inherit rtsflags rtsMemSize; };
       cardano-node = cardano-node.packages.x86_64-linux.cardano-node;
     };
   in {
