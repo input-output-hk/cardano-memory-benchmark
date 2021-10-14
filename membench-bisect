@@ -2,41 +2,43 @@
 
 set -xeu
 
-precision=${1:-25000}
-start_fail=${2:-6000000}
-start_pass=${3:-16000000}
+precision=${1:-25}
+start_fail=${2:-1024}
+start_pass=${3:-8192}
 
 iteration=0
-while true
-do if test -f 'membench-last-fail.json'
-   then last_fail=$(jq '.memLimit' 'membench-last-fail.json')
-   else last_fail=$start_fail; fi
+last_pass=$start_pass
+last_fail=$start_fail
+buildTimeout=$((30*60))
+while true; do
+  outcome_gap=$(($last_pass - $last_fail))
+  echo "membench:  pass/fail outcome gap: $outcome_gap"
+  if test $outcome_gap -le $precision
+  then echo "membench:  outcome gap below precision $precision, terminating"; exit 0
+  else echo "membench:  outcome gap above precision $precision, next iteration"; fi
 
-   if test -f 'membench-last-pass.json'
-   then last_pass=$(jq '.memLimit' 'membench-last-pass.json')
-   else last_pass=$start_pass; fi
+  if [ -e membench-last-pass ]; then
+    # fail automatically if the build takes 1.5x longer then the last passing run
+    buildTimeout=$(jq < membench-last-pass/refined.json '.totaltime * 1.5 | floor')
+  fi
 
-   outcome_gap=$(($last_pass - $last_fail))
-   echo "membench:  pass/fail outcome gap: $outcome_gap"
-   if test $outcome_gap -le $precision
-   then echo "membench:  outcome gap below precision $precision, terminating"; exit 0
-   else echo "membench:  outcome gap above precision $precision, next iteration"; fi
+  nextLimit=$((($last_fail + $last_pass) / 2))
 
-   nextLimit=$((($last_fail + $last_pass) / 2))
+  time nix-build -A membench --argstr rtsMemSize ${nextLimit}M -o result-${nextLimit} -Q --option timeout ${buildTimeout}
 
-   echo "{ memLimit: $nextLimit }" > 'membench-limit.json'
-   time nix build '.#membench' -L --out-link 'membench-last'
-   # nix-store -r $(readlink ./result) --add-root 'membench-last' --indirect
+  lastResult=$(jq .failed "result-${nextLimit}/refined.json")
+  if [ x$lastResult = xfalse ]; then
+    outcome=pass
+    last_pass=$nextLimit
+  else
+    outcome=fail
+    last_fail=$nextLimit
+  fi
 
-   lastResult=$(jq .failed 'result/refined.json')
-   if [ x$lastResult = xfalse ]
-   then outcome=pass
-   else outcome=fail; fi
+  cp -f "result-${nextLimit}/refined.json" 'membench-last-'$outcome'.json'
+  nix-store -r $(readlink result-${nextLimit}) --add-root membench-last-${outcome} --indirect
 
-   cp -f 'membench-last/refined.json' 'membench-last-'$outcome'.json'
-   rm -f 'membench-last-'$outcome; mv 'membench-last' 'membench-last-'$outcome
-
-   echo "--------------------------------- iteration $iteration boundaries:"
-   jq . 'membench-last-fail.json'
-   jq . 'membench-last-pass.json'
+  echo "--------------------------------- iteration $iteration boundaries:"
+  jq . 'membench-last-fail.json' || true
+  jq . 'membench-last-pass.json' || true
 done
