@@ -65,14 +65,13 @@ runCommand "membench-post-process" {
   buildInputs = [ jq hexdump ];
 } ''
   ls -lh ${membench}
-  cp -r ${membench} $out
-  chmod -R +w $out
+  mkdir $out
   cd $out
   ln -sv ${membench} input
 
   # so the node wont get GC'd, and you could confirm the source it came from
   ln -s ${cardano-node}/bin/cardano-node .
-  totaltime=$({ head -n1 log.json ; tail -n1 log.json;} | jq --slurp 'def katip_timestamp_to_iso8601: .[:-4] + "Z" | fromdateiso8601; map(.at | katip_timestamp_to_iso8601) | .[1] - .[0]')
+  totaltime=$({ head -n1 input/log.json ; tail -n1 input/log.json;} | jq --slurp 'def katip_timestamp_to_iso8601: .[:-4] + "Z" | fromdateiso8601; map(.at | katip_timestamp_to_iso8601) | .[1] - .[0]')
   highwater=$(cat ${membench}/highwater | cut -d' ' -f6)
 
   if [ -f ${membench}/nix-support/failed ]; then
@@ -83,5 +82,5 @@ runCommand "membench-post-process" {
     export FAILED=false
   fi
 
-  jq --slurp < summary.json 'def minavgmax: length as $len | { min: (min/1024/1024), avg: ((add / $len)/1024/1024), max: (max/1024/1024) }; map(select(.ns[0] == "cardano.node.resources") | .data) | { RSS: map(.RSS) | minavgmax, Heap: map(.Heap) | minavgmax, CentiCpuMax: map(.CentiCpu) | max, CentiMutMax: map(.CentiMut) | max, SecGC: (map(.CentiGC)/100) | max, CentiBlkIO: map(.CentiBlkIO) | max, flags: "${flags}", chain: { startSlot: ${toString snapshot.snapshotSlot}, stopFile: ${toString snapshot.finalEpoch} }, totaltime:'$totaltime', failed:'$FAILED' }' > refined.json
+  jq --slurp < input/summary.json 'def minavgmax: length as $len | { min: (min/1024/1024), avg: ((add / $len)/1024/1024), max: (max/1024/1024) }; map(select(.ns[0] == "cardano.node.resources") | .data) | { RSS: map(.RSS) | minavgmax, Heap: map(.Heap) | minavgmax, CentiCpuMax: map(.CentiCpu) | max, CentiMutMax: map(.CentiMut) | max, SecGC: (map(.CentiGC) | max / 100), CentiBlkIO: map(.CentiBlkIO) | max, flags: "${flags}", chain: { startSlot: ${toString snapshot.snapshotSlot}, stopFile: ${toString snapshot.finalEpoch} }, totaltime:'$totaltime', failed:'$FAILED' }' > refined.json
 ''
