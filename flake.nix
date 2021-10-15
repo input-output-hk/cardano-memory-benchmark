@@ -13,6 +13,17 @@
     params = builtins.fromJSON (builtins.readFile ./membench_params.json);
     rtsMemSize = null;
     rtsflags = params.rtsFlags;
+    limit2 = "4096M";
+    variantTable = {
+      baseline = "";
+      justc = "-c";
+      four  = "-H4G -M${limit2}";
+      five  = "-H4G -M${limit2} -c50";
+      six   = "-H4G -M${limit2} -c70";
+      seven = "-H4G -M${limit2} -G3";
+      eight = "-H4G -M${limit2} -G3 -c50";
+      nine  = "-H4G -M${limit2} -G3 -c70";
+    };
     overlay = self: super: {
       inherit mainnet-chain;
       nodesrc = cardano-node2;
@@ -21,13 +32,14 @@
       db-analyser = cardano-node2.packages.x86_64-linux.db-analyser;
       snapshot = self.callPackage ./snapshot-generation.nix {};
       membench = self.callPackage ./membench.nix { inherit rtsflags rtsMemSize; };
+      membenches = self.callPackage ./membenches.nix { inherit variantTable; };
       cardano-node = cardano-node.packages.x86_64-linux.cardano-node;
     };
   in {
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; overlays = [ overlay ]; };
     in {
-      inherit (pkgs) snapshot db-analyser membench;
+      inherit (pkgs) snapshot db-analyser membench membenches;
     };
   };
 }

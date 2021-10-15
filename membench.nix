@@ -48,7 +48,7 @@ let
       | .defaultScribes = .defaultScribes + [ [ "FileSK", "log.json" ] ]
       ' ${nodesrc}/configuration/cardano/mainnet-config.json > config.json
     cp -v ${nodesrc}/configuration/cardano/*-genesis.json .
-    command time -f %M -o $out/highwater cardano-node +RTS ${flags} -RTS run --database-path chain/ --config config.json --topology ${topologyPath} --shutdown-on-slot-synced 2000
+    command time -f %M -o $out/highwater cardano-node +RTS -s$out/rts.dump ${flags} -RTS run --database-path chain/ --config config.json --topology ${topologyPath} --shutdown-on-slot-synced 2000
     #sleep 600
     #kill -int $!
     pwd
