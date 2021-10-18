@@ -469,13 +469,18 @@
     "mainnet-chain_2": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-fyomo9Dl9ShXp44iBoNmuE5kJOmELJ9A+LN0Aj2rb9U=",
-        "path": "/home/clever/chain",
-        "type": "path"
+        "lastModified": 1634568328,
+        "narHash": "sha256-1E9cFhnr/KrycQnFMSiRcxF5fXvrgObN1//zDrea3lY=",
+        "owner": "input-output-hk",
+        "repo": "cardano-mainnet-mirror",
+        "rev": "b6882f314f4f826e193dc2341cbd0d5f6970cde3",
+        "type": "github"
       },
       "original": {
-        "path": "/home/clever/chain",
-        "type": "path"
+        "owner": "input-output-hk",
+        "ref": "shelley",
+        "repo": "cardano-mainnet-mirror",
+        "type": "github"
       }
     },
     "nix-tools": {

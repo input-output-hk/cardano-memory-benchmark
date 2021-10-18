@@ -5,7 +5,7 @@
     cardano-node2.url = "github:input-output-hk/cardano-node/membench";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
-    mainnet-chain.url = "path:/home/clever/chain";
+    mainnet-chain.url = "github:input-output-hk/cardano-mainnet-mirror/shelley";
     mainnet-chain.flake = false;
   };
   outputs = { ouroboros-network, self, cardano-node, nixpkgs, cardano-node2, mainnet-chain }: let
