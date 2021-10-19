@@ -13,7 +13,7 @@
     params = builtins.fromJSON (builtins.readFile ./membench_params.json);
     rtsMemSize = null;
     rtsflags = params.rtsFlags;
-    limit2 = "4096M";
+    limit2 = "6553M";
     variantTable = {
       baseline = "";
       justc = "-c";

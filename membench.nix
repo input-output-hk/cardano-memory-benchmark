@@ -1,4 +1,4 @@
-{ runCommand, cardano-node, jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump, nodesrc, lib, rtsflags, rtsMemSize }:
+{ runCommand, cardano-node, jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump, nodesrc, lib, rtsflags, rtsMemSize, n ? null }:
 
 let
   flags = "${rtsflags} ${lib.optionalString (rtsMemSize != null) "-M${rtsMemSize}"}";
@@ -8,6 +8,7 @@ let
   membench = runCommand "membench" {
     buildInputs = [ cardano-node jq strace util-linux procps time ];
     succeedOnFailure = true;
+    inherit n;
     failureHook = ''
       egrep 'ReplayFromSnapshot|ReplayedBlock|will terminate|Ringing the node shutdown|TookSnapshot|cardano.node.resources' log.json > $out/summary.json
       mv -vi log*json config.json $out/
