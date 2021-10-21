@@ -64,6 +64,7 @@ let
 in
 runCommand "membench-post-process" {
   buildInputs = [ jq hexdump ];
+  preferLocalBuild = true;
 } ''
   ls -lh ${membench}
   mkdir $out
