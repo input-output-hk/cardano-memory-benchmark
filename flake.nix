@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs.follows = "cardano-node/haskellNix/nixpkgs-2105";
-    cardano-node.url = "github:input-output-hk/cardano-node";
+    cardano-node.url = "github:input-output-hk/cardano-node/master";
     cardano-node2.url = "github:input-output-hk/cardano-node/membench";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
