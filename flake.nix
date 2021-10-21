@@ -41,5 +41,6 @@
     in {
       inherit (pkgs) snapshot db-analyser membench membenches;
     };
+    hydraJobs.x86_64-linux = self.packages.x86_64-linux.membenches;
   };
 }
