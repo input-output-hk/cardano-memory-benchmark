@@ -1,4 +1,4 @@
-{ membench, variantTable, lib, runCommand, rerunCount ? 5 }:
+{ membench, variantTable, lib, runCommand, rerunCount ? 2 }:
 
 let
   variants = lib.mapAttrs (k: v: membench.override { rtsflags = v; }) variantTable;
