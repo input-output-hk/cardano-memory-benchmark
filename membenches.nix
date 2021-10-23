@@ -12,6 +12,7 @@ runCommand "membenches" {
   ${lib.concatStringsSep "\n" symlinks}
 
   cd $out
-  tar -cvf alljson.tar */*.json */input/*.json
-  echo "file binary-dist $out/alljson.tar" >> nix-support/hydra-build-products
+  tar -cf alljson.tar */*.json */input/*.json */input/highwater */input/rts.dump */input/stderr
+  gzip -9v alljson.tar
+  echo "file binary-dist $out/alljson.tar.gz" >> nix-support/hydra-build-products
 ''
