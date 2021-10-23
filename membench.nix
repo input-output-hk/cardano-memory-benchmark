@@ -6,6 +6,7 @@ let
   topologyPath = builtins.toFile "topology.json" (builtins.toJSON topology);
   inVM = false;
   membench = runCommand "membench" {
+    outputs = [ "out" "chain" ];
     buildInputs = [ cardano-node jq strace util-linux procps time ];
     succeedOnFailure = true;
     inherit n;
@@ -58,7 +59,7 @@ let
     egrep 'ReplayFromSnapshot|ReplayedBlock|will terminate|Ringing the node shutdown|TookSnapshot|cardano.node.resources' log.json > $out/summary.json
     ls -ltrh chain/ledger/
     mv -vi log*json config.json $out/
-    mv chain $out/
+    mv chain $chain
     rm $out/nix-support/failed || true
   '';
 in
@@ -66,20 +67,20 @@ runCommand "membench-post-process" {
   buildInputs = [ jq hexdump ];
   preferLocalBuild = true;
 } ''
-  ls -lh ${membench}
+  ls -lh ${membench.out}
   mkdir $out
   cd $out
-  ln -sv ${membench} input
+  ln -sv ${membench.out} input
 
   # so the node wont get GC'd, and you could confirm the source it came from
   ln -s ${cardano-node}/bin/cardano-node .
   totaltime=$({ head -n1 input/log.json ; tail -n1 input/log.json;} | jq --slurp 'def katip_timestamp_to_iso8601: .[:-4] + "Z" | fromdateiso8601; map(.at | katip_timestamp_to_iso8601) | .[1] - .[0]')
-  highwater=$(cat ${membench}/highwater | cut -d' ' -f6)
+  highwater=$(cat ${membench.out}/highwater | cut -d' ' -f6)
 
-  if [ -f ${membench}/nix-support/failed ]; then
+  if [ -f ${membench.out}/nix-support/failed ]; then
     export FAILED=true
     mkdir $out/nix-support -p
-    cp ${membench}/nix-support/failed $out/nix-support/failed
+    cp ${membench.out}/nix-support/failed $out/nix-support/failed
   else
     export FAILED=false
   fi
