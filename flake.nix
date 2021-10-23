@@ -41,6 +41,9 @@
     in {
       inherit (pkgs) snapshot db-analyser membench membenches;
     };
-    hydraJobs.x86_64-linux.membenches = self.packages.x86_64-linux.membenches;
+    hydraJobs.x86_64-linux = nixpkgs.lib.fix (s: {
+      membenches = self.packages.x86_64-linux.membenches;
+      membenches-1 = s.membenches.override { rerunCount = 1; };
+    });
   };
 }
