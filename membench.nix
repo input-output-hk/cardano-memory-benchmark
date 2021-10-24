@@ -13,14 +13,16 @@ let
     failureHook = ''
       egrep 'ReplayFromSnapshot|ReplayedBlock|will terminate|Ringing the node shutdown|TookSnapshot|cardano.node.resources' log.json > $out/summary.json
       mv -vi log*json config.json $out/
-      mv chain $out/
+      mv chain $chain/
+      echo $exitCode > $out/nix-support/custom-failed
+      exit 0
     '';
   } ''
     mkdir -pv $out/nix-support
 
     ${lib.optionalString inVM ''
     echo 0 > /tmp/xchg/in-vm-exit
-    echo 42 > $out/nix-support/failed
+    echo 42 > $out/nix-support/custom-failed
 
     # never overcommit
     echo 2 > /proc/sys/vm/overcommit_memory
@@ -60,27 +62,28 @@ let
     ls -ltrh chain/ledger/
     mv -vi log*json config.json $out/
     mv chain $chain
-    rm $out/nix-support/failed || true
+    rm $out/nix-support/custom-failed || true
   '';
 in
 runCommand "membench-post-process" {
   buildInputs = [ jq hexdump ];
   preferLocalBuild = true;
+  input = membench.out;
 } ''
-  ls -lh ${membench.out}
+  ls -lh $input
   mkdir $out
   cd $out
-  ln -sv ${membench.out} input
+  ln -sv $input input
 
   # so the node wont get GC'd, and you could confirm the source it came from
   ln -s ${cardano-node}/bin/cardano-node .
   totaltime=$({ head -n1 input/log.json ; tail -n1 input/log.json;} | jq --slurp 'def katip_timestamp_to_iso8601: .[:-4] + "Z" | fromdateiso8601; map(.at | katip_timestamp_to_iso8601) | .[1] - .[0]')
-  highwater=$(cat ${membench.out}/highwater | cut -d' ' -f6)
+  highwater=$(cat $input/highwater | cut -d' ' -f6)
 
-  if [ -f ${membench.out}/nix-support/failed ]; then
+  if [ -f $input/nix-support/custom-failed ]; then
     export FAILED=true
     mkdir $out/nix-support -p
-    cp ${membench.out}/nix-support/failed $out/nix-support/failed
+    cp $input/nix-support/custom-failed $out/nix-support/custom-failed
   else
     export FAILED=false
   fi
