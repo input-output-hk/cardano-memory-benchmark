@@ -24,6 +24,7 @@ let
     { prefix = "015"; hash = "sha256-MJYuYHYAHLookWxRnVb3r7mXzmPMfosb2Ed2M4ppVF8="; }
     { prefix = "016"; hash = "sha256-Wl0PezrjB7qAwNd7DtEXGEzEHXPxP7YF/c4PLJUbuIU="; }
     { prefix = "017"; hash = "sha256-v/8Wc4NL7nqRavFlOafJ1cnAlzV4iV1mOUzVUA/4z7Y="; }
+    { prefix = "018"; hash = "sha256-z7jcDGmgR6XMwCpOECeHjS5UBfZY5fiZqM1gNODGP0M="; }
   ];
   fetchpart = { prefix, hash }:
   fetchzip {
