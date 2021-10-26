@@ -5,10 +5,8 @@
     cardano-node2.url = "github:input-output-hk/cardano-node/membench";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
-    mainnet-chain.url = "github:input-output-hk/cardano-mainnet-mirror/shelley";
-    mainnet-chain.flake = false;
   };
-  outputs = { ouroboros-network, self, cardano-node, nixpkgs, cardano-node2, mainnet-chain }: let
+  outputs = { ouroboros-network, self, cardano-node, nixpkgs, cardano-node2 }: let
     network = import ouroboros-network { system = "x86_64-linux"; };
     params = builtins.fromJSON (builtins.readFile ./membench_params.json);
     rtsMemSize = null;
@@ -25,7 +23,7 @@
       nine  = "-H4G -M${limit2} -G3 -c70";
     };
     overlay = self: super: {
-      inherit mainnet-chain;
+      mainnet-chain = self.callPackage ./chain.nix {};
       nodesrc = cardano-node2;
       # TODO, fix this
       #db-analyser = network.haskellPackages.ouroboros-consensus-cardano.components.exes.db-analyser;

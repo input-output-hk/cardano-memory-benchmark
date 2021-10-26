@@ -466,23 +466,6 @@
         "type": "path"
       }
     },
-    "mainnet-chain_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1634568328,
-        "narHash": "sha256-1E9cFhnr/KrycQnFMSiRcxF5fXvrgObN1//zDrea3lY=",
-        "owner": "input-output-hk",
-        "repo": "cardano-mainnet-mirror",
-        "rev": "b6882f314f4f826e193dc2341cbd0d5f6970cde3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "input-output-hk",
-        "ref": "shelley",
-        "repo": "cardano-mainnet-mirror",
-        "type": "github"
-      }
-    },
     "nix-tools": {
       "flake": false,
       "locked": {
@@ -697,7 +680,6 @@
       "inputs": {
         "cardano-node": "cardano-node",
         "cardano-node2": "cardano-node2",
-        "mainnet-chain": "mainnet-chain_2",
         "nixpkgs": [
           "cardano-node",
           "haskellNix",
