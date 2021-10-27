@@ -1,12 +1,14 @@
 {
   inputs = {
-    nixpkgs.follows = "cardano-node/haskellNix/nixpkgs-2105";
-    cardano-node.url = "github:input-output-hk/cardano-node";
-    cardano-node2.url = "github:input-output-hk/cardano-node/membench";
+    cardano-node-measured.url = "github:input-output-hk/cardano-node";
+    nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105"; ## WARNING:  update this to match the measured node
+
+    cardano-node-snapshot.url = "github:input-output-hk/cardano-node/membench";
+    cardano-node-process.url = "github:input-output-hk/cardano-node/bench/analysis";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
   };
-  outputs = { ouroboros-network, self, cardano-node, nixpkgs, cardano-node2 }: let
+  outputs = { ouroboros-network, self, nixpkgs, cardano-node-snapshot, cardano-node-process, cardano-node-measured }: let
     network = import ouroboros-network { system = "x86_64-linux"; };
     params = builtins.fromJSON (builtins.readFile ./membench_params.json);
     rtsMemSize = null;
@@ -23,15 +25,15 @@
       nine  = "-H4G -M${limit2} -G3 -c70";
     };
     overlay = self: super: {
+      inherit cardano-node-snapshot;
       mainnet-chain = self.callPackage ./chain.nix {};
-      nodesrc = cardano-node2;
       # TODO, fix this
       #db-analyser = network.haskellPackages.ouroboros-consensus-cardano.components.exes.db-analyser;
-      db-analyser = cardano-node2.packages.x86_64-linux.db-analyser;
+      db-analyser = cardano-node-snapshot.packages.x86_64-linux.db-analyser;
       snapshot = self.callPackage ./snapshot-generation.nix {};
       membench = self.callPackage ./membench.nix { inherit rtsflags rtsMemSize; };
       membenches = self.callPackage ./membenches.nix { inherit variantTable; };
-      cardano-node = cardano-node.packages.x86_64-linux.cardano-node;
+      cardano-node-measured = cardano-node-measured.packages.x86_64-linux.cardano-node;
     };
   in {
     packages.x86_64-linux = let
@@ -41,7 +43,7 @@
     };
     hydraJobs.x86_64-linux = nixpkgs.lib.fix (s: {
       membenches = self.packages.x86_64-linux.membenches;
-      membenches-1 = s.membenches.override { rerunCount = 1; };
+      membenches-1 = s.membenches.override { nIterations = 1; };
     });
   };
 }

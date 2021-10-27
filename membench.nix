@@ -1,4 +1,8 @@
-{ runCommand, cardano-node, jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump, nodesrc, lib, rtsflags, rtsMemSize, n ? null }:
+{ runCommand, lib
+, jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump
+, cardano-node-snapshot, cardano-node-measured
+, rtsflags, rtsMemSize, currentIteration ? null
+}:
 
 let
   flags = "${rtsflags} ${lib.optionalString (rtsMemSize != null) "-M${rtsMemSize}"}";
@@ -7,9 +11,9 @@ let
   inVM = false;
   membench = runCommand "membench" {
     outputs = [ "out" "chain" ];
-    buildInputs = [ cardano-node jq strace util-linux procps time ];
+    buildInputs = [ cardano-node-measured jq strace util-linux procps time ];
     succeedOnFailure = true;
-    inherit n;
+    inherit currentIteration;
     failureHook = ''
       egrep 'ReplayFromSnapshot|ReplayedBlock|will terminate|Ringing the node shutdown|TookSnapshot|cardano.node.resources' log.json > $out/summary.json
       mv -vi log*json config.json $out/
@@ -50,8 +54,8 @@ let
         }
       ]
       | .defaultScribes = .defaultScribes + [ [ "FileSK", "log.json" ] ]
-      ' ${nodesrc}/configuration/cardano/mainnet-config.json > config.json
-    cp -v ${nodesrc}/configuration/cardano/*-genesis.json .
+      ' ${cardano-node-snapshot}/configuration/cardano/mainnet-config.json > config.json
+    cp -v ${cardano-node-snapshot}/configuration/cardano/*-genesis.json .
     command time -f %M -o $out/highwater cardano-node +RTS -s$out/rts.dump ${flags} -RTS run --database-path chain/ --config config.json --topology ${topologyPath} --shutdown-on-slot-synced 2000 2>$out/stderr
     #sleep 600
     #kill -int $!
@@ -76,7 +80,7 @@ runCommand "membench-post-process" {
   ln -sv $input input
 
   # so the node wont get GC'd, and you could confirm the source it came from
-  ln -s ${cardano-node}/bin/cardano-node .
+  ln -s ${cardano-node-measured}/bin/cardano-node .
   totaltime=$({ head -n1 input/log.json ; tail -n1 input/log.json;} | jq --slurp 'def katip_timestamp_to_iso8601: .[:-4] + "Z" | fromdateiso8601; map(.at | katip_timestamp_to_iso8601) | .[1] - .[0]')
   highwater=$(cat $input/highwater | cut -d' ' -f6)
 

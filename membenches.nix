@@ -1,8 +1,12 @@
-{ membench, variantTable, lib, runCommand, rerunCount ? 1, jq }:
+{ lib, jq, runCommand, membench, variantTable, nIterations ? 1 }:
 
 let
   variants = lib.mapAttrs (k: v: membench.override { rtsflags = v; }) variantTable;
-  makeNLinks = k: v: lib.concatMapStringsSep "\n" (n: "ln -sv ${v.override { inherit n; }} $out/${k}-${toString n}") (lib.range 1 rerunCount);
+  makeNLinks =
+    k: v:
+    lib.concatMapStringsSep "\n"
+      (currentIteration: "ln -sv ${v.override { inherit currentIteration; }} $out/${k}-${toString currentIteration}")
+      (lib.range 1 nIterations);
   symlinks = builtins.attrValues (lib.mapAttrs makeNLinks variants);
 in
 runCommand "membenches" {

@@ -1,9 +1,9 @@
-{ runCommand, db-analyser, mainnet-chain, nodesrc }:
+{ runCommand, db-analyser, mainnet-chain, cardano-node-snapshot }:
 
 let
-  params = builtins.fromJSON (builtins.readFile ./membench_params.json);
-  snapshotSlot = params.snapshotSlot;
-  finalEpoch = params.finalImmFile;
+  chainRange = builtins.fromJSON (builtins.readFile ./chain-range.json);
+  snapshotSlot = chainRange.snapshotSlot;
+  finalEpoch   = chainRange.finalImmFile;
   secondLastEpoch = finalEpoch - 1;
 in runCommand "snapshot-generation" {
   buildInputs = [ db-analyser ];
@@ -18,7 +18,7 @@ in runCommand "snapshot-generation" {
   cp -v ${mainnet-chain}/immutable/0${toString finalEpoch}.{chunk,primary,secondary} chain/immutable
   chmod +w -R chain
 
-  cp ${nodesrc}/configuration/cardano/*-genesis.json .
+  cp ${cardano-node-snapshot}/configuration/cardano/*-genesis.json .
 
   db-analyser --db chain/ cardano --configByron mainnet-byron-genesis.json --configShelley mainnet-shelley-genesis.json --nonce 1a3be38bcbb7911969283716ad7aa550250226b76a61fc51cc9a9a35d9276d81 --configAlonzo mainnet-alonzo-genesis.json --store-ledger ${toString snapshotSlot}
 
