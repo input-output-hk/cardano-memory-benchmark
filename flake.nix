@@ -20,9 +20,9 @@
       four  = "-H4G -M${limit2}";
       five  = "-H4G -M${limit2} -c50";
       six   = "-H4G -M${limit2} -c70";
-      seven = "-H4G -M${limit2} -G3";
-      eight = "-H4G -M${limit2} -G3 -c50";
-      nine  = "-H4G -M${limit2} -G3 -c70";
+      #seven = "-H4G -M${limit2} -G3";
+      #eight = "-H4G -M${limit2} -G3 -c50";
+      #nine  = "-H4G -M${limit2} -G3 -c70";
     };
     overlay = self: super: {
       inherit cardano-node-snapshot;
