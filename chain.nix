@@ -2,7 +2,7 @@
 # manually delete any file that does not have a complete set of 100 chunks
 # $ s3cmd put *.tar.gz s3://cardano-mainnet-chain
 
-{ fetchzip, lib, buildEnv, runCommand }:
+{ fetchzip, lib, buildEnv, runCommand, upToChunk ? null }:
 
 let
   hashes = [
@@ -32,9 +32,16 @@ let
     url = "https://cardano-mainnet-chain.s3.eu-central-1.amazonaws.com/${prefix}.tar.gz";
     sha256 = hash;
   };
+  filterUpTo = hash:
+  let
+    sansPrefix = lib.removePrefix "0" (lib.removePrefix "0" hash.prefix);
+    chunkPrefix = builtins.fromJSON sansPrefix;
+  in
+    chunkPrefix <= (upToChunk / 100);
+  f = if upToChunk == null then (_: true) else filterUpTo;
   immutable = buildEnv {
     name = "chain";
-    paths = map fetchpart hashes;
+    paths = map fetchpart (lib.filter f hashes);
   };
 in runCommand "chain" {} ''
   mkdir $out

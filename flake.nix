@@ -4,7 +4,7 @@
     nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105"; ## WARNING:  update this to match the measured node
 
     cardano-node-snapshot.url = "github:input-output-hk/cardano-node/membench";
-    cardano-node-process.url = "github:input-output-hk/cardano-node/bench/analysis";
+    cardano-node-process.url = "github:input-output-hk/cardano-node/bench-analysis";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
   };
@@ -30,7 +30,7 @@
       # TODO, fix this
       #db-analyser = network.haskellPackages.ouroboros-consensus-cardano.components.exes.db-analyser;
       db-analyser = cardano-node-snapshot.packages.x86_64-linux.db-analyser;
-      snapshot = self.callPackage ./snapshot-generation.nix {};
+      snapshot = self.callPackage ./snapshot-generation.nix { chain = mainnet-chain; };
       membench = self.callPackage ./membench.nix { inherit rtsflags rtsMemSize; };
       membenches = self.callPackage ./membenches.nix { inherit variantTable; };
       cardano-node-measured = cardano-node-measured.packages.x86_64-linux.cardano-node;
@@ -39,7 +39,7 @@
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; overlays = [ overlay ]; };
     in {
-      inherit (pkgs) snapshot db-analyser membench membenches;
+      inherit (pkgs) snapshot db-analyser membench membenches mainnet-chain;
     };
     hydraJobs.x86_64-linux = nixpkgs.lib.fix (s: {
       membenches = self.packages.x86_64-linux.membenches;

@@ -198,7 +198,7 @@
       },
       "original": {
         "owner": "input-output-hk",
-        "ref": "bench/analysis",
+        "ref": "bench-analysis",
         "repo": "cardano-node",
         "type": "github"
       }
