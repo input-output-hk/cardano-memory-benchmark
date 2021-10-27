@@ -2,6 +2,7 @@
 , jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump
 , cardano-node-snapshot, cardano-node-measured
 , rtsflags, rtsMemSize, currentIteration ? null
+, suffix ? ""
 }:
 
 let
@@ -9,7 +10,7 @@ let
   topology = { Producers = []; };
   topologyPath = builtins.toFile "topology.json" (builtins.toJSON topology);
   inVM = false;
-  membench = runCommand "membench" {
+  membench = runCommand "membench${suffix}" {
     outputs = [ "out" "chain" ];
     buildInputs = [ cardano-node-measured jq strace util-linux procps time ];
     succeedOnFailure = true;
@@ -69,7 +70,7 @@ let
     rm $out/nix-support/custom-failed || true
   '';
 in
-runCommand "membench-post-process" {
+runCommand "membench-post-process${suffix}" {
   buildInputs = [ jq hexdump ];
   preferLocalBuild = true;
   input = membench.out;

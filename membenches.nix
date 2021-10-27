@@ -1,7 +1,7 @@
 { lib, jq, runCommand, membench, variantTable, nIterations ? 1 }:
 
 let
-  variants = lib.mapAttrs (k: v: membench.override { rtsflags = v; }) variantTable;
+  variants = lib.mapAttrs (k: v: membench.override { rtsflags = v; suffix = "-${k}";}) variantTable;
   makeNLinks =
     k: v:
     lib.concatMapStringsSep "\n"
