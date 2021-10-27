@@ -30,7 +30,7 @@
       # TODO, fix this
       #db-analyser = network.haskellPackages.ouroboros-consensus-cardano.components.exes.db-analyser;
       db-analyser = cardano-node-snapshot.packages.x86_64-linux.db-analyser;
-      snapshot = self.callPackage ./snapshot-generation.nix { chain = mainnet-chain; };
+      snapshot = self.callPackage ./snapshot-generation.nix { chain = self.mainnet-chain; };
       membench = self.callPackage ./membench.nix { inherit rtsflags rtsMemSize; };
       membenches = self.callPackage ./membenches.nix { inherit variantTable; };
       cardano-node-measured = cardano-node-measured.packages.x86_64-linux.cardano-node;
