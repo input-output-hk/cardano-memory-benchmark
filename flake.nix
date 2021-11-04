@@ -34,16 +34,18 @@
       membench = self.callPackage ./membench.nix { inherit rtsflags rtsMemSize; };
       membenches = self.callPackage ./membenches.nix { inherit variantTable; };
       cardano-node-measured = cardano-node-measured.packages.x86_64-linux.cardano-node;
+      post-process = self.callPackage ./post-process.nix {};
     };
   in {
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; overlays = [ overlay ]; };
     in {
-      inherit (pkgs) snapshot db-analyser membench membenches mainnet-chain;
+      inherit (pkgs) snapshot db-analyser membench membenches mainnet-chain post-process;
     };
     hydraJobs.x86_64-linux = nixpkgs.lib.fix (s: {
-      membenches = self.packages.x86_64-linux.membenches;
-      membenches-1 = s.membenches.override { nIterations = 1; };
+      post-process = self.packages.x86_64-linux.post-process;
+      membenches = self.packages.x86_64-linux.membenches.override { nIterations = 5; };
+      membenches-1 = self.packages.x86_64-linux.membenches.override { nIterations = 1; };
     });
   };
 }
