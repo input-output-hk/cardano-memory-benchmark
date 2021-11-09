@@ -47,14 +47,18 @@
       inherit cardano-node-process;
       batch = self.callPackage ./batch.nix { inherit name variantTable; };
 
-      ## 5. Batch post-processing:
+      ## 5. Data aggregation and statistics
+      batch-results      = self.callPackage ./batch-process.nix {};
+
+      ## 6. Report generation
+      batch-report       = self.callPackage ./batch-render.nix {};
       batch-hydra-report = self.callPackage ./batch-hydra-report.nix {};
     };
   in {
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; overlays = [ overlay ]; };
     in {
-      inherit (pkgs) mainnet-chain db-analyser snapshot membench batch batch-hydra-report;
+      inherit (pkgs) mainnet-chain db-analyser snapshot membench batch batch-results batch-report batch-hydra-report;
     };
     hydraJobs.x86_64-linux = nixpkgs.lib.fix (s: {
       post-process = self.packages.x86_64-linux.post-process;

@@ -7,3 +7,9 @@ help: ## Print documentation
 
 batch: ## Run a survey batch of benchmarks: 5 runs of each entry in the variantTable
 	nix build .#batch
+
+results: ## Same as batch, but also aggregate and do statistical processing
+	nix build .#batch-results
+
+report: ## Same as report, but also produce a report
+	nix build .#batch-report
