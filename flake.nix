@@ -13,6 +13,7 @@
     params = builtins.fromJSON (builtins.readFile ./membench_params.json);
     rtsMemSize = null;
     rtsflags = params.rtsFlags;
+    name = "default";
     limit2 = "6553M";
     variantTable = {
       baseline = "";
@@ -25,27 +26,40 @@
       #nine  = "-H4G -M${limit2} -G3 -c70";
     };
     overlay = self: super: {
-      inherit cardano-node-snapshot;
+      ## 0. Chain
       mainnet-chain = self.callPackage ./chain.nix {};
+
       # TODO, fix this
       #db-analyser = network.haskellPackages.ouroboros-consensus-cardano.components.exes.db-analyser;
+
+      ## 1. Ledger snapshot
+      inherit cardano-node-snapshot;
       db-analyser = cardano-node-snapshot.packages.x86_64-linux.db-analyser;
       snapshot = self.callPackage ./snapshot-generation.nix { chain = self.mainnet-chain; };
-      membench = self.callPackage ./membench.nix { inherit rtsflags rtsMemSize; };
-      membenches = self.callPackage ./membenches.nix { inherit variantTable; };
+
+      ## 2. Node under measurement
       cardano-node-measured = cardano-node-measured.packages.x86_64-linux.cardano-node;
-      post-process = self.callPackage ./post-process.nix {};
+
+      ## 3. Single run
+      membench = self.callPackage ./membench.nix { inherit rtsflags rtsMemSize; };
+
+      ## 4. Run batch:  profiles X iterations
+      inherit cardano-node-process;
+      batch = self.callPackage ./batch.nix { inherit name variantTable; };
+
+      ## 5. Batch post-processing:
+      batch-hydra-report = self.callPackage ./batch-hydra-report.nix {};
     };
   in {
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; overlays = [ overlay ]; };
     in {
-      inherit (pkgs) snapshot db-analyser membench membenches mainnet-chain post-process;
+      inherit (pkgs) mainnet-chain db-analyser snapshot membench batch batch-hydra-report;
     };
     hydraJobs.x86_64-linux = nixpkgs.lib.fix (s: {
       post-process = self.packages.x86_64-linux.post-process;
-      membenches = self.packages.x86_64-linux.membenches.override { nIterations = 5; };
-      membenches-1 = self.packages.x86_64-linux.membenches.override { nIterations = 1; };
+      batch = self.packages.x86_64-linux.batch.override { nIterations = 5; };
+      batch-1 = self.packages.x86_64-linux.batch.override { nIterations = 1; };
     });
   };
 }

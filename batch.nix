@@ -1,4 +1,8 @@
-{ lib, jq, runCommand, membench, variantTable, nIterations ? 1 }:
+{ lib, bash, jq, runCommand
+, membench
+, cardano-node-process
+, name, variantTable, nIterations ? 1
+}:
 
 with lib;
 let
@@ -26,24 +30,43 @@ let
       (mapAttrs variantIterationsShell allVariants);
 
   nVariants = length (__attrNames variantTable);
+  batch-id  = "${name}-${toString nVariants}vars-${toString nIterations}runs";
 
-in runCommand "membench-matrix-${toString nVariants}vars-${toString nIterations}runs" {
+in (runCommand "membench-batch-${batch-id}" {
   preferLocalBuild = true;
   nativeBuildInputs = [ jq ];
 } ''
   mkdir -p $out/nix-support
+
+  ## 0. link the runs
   ${concatStringsSep "\n" allVariantIterationsShell}
 
+  ## 1. index the linked runs
+  process_args=(
+    --no-progress
+    collect ${batch-id} membenches_v1 $out
+    )
+  ${bash}/bin/bash ${cardano-node-process}/bench/process/process.sh ''${process_args[*]} \
+    > $out/index.json
+
+  ## 2. Package
   cd $out
+  tar -cf batch.tar     \
+     index.json         \
+     */*.json           \
+     */input/*.json     \
+     */input/highwater  \
+     */input/rts.dump   \
+     */input/stderr
+  gzip -9v batch.tar
 
-  cp ${./render_html.jq} render_html.jq
-  cat */refined.json | jq --slurp 'include "render_html"; . | render_html' --raw-output > $out/render.html
-
-  tar -cf alljson.tar */*.json */input/*.json */input/highwater */input/rts.dump */input/stderr
-  gzip -9v alljson.tar
-
+  ## 3. Mark for Hydra publishing
   cat > nix-support/hydra-build-products <<EOF
-  file binary-dist $out/alljson.tar.gz
-  report testlog $out render.html
+  file binary-dist $out/batch.tar.gz
   EOF
-''
+'')
+// {
+  passthru = {
+    inherit name batch-id variantTable nIterations;
+  };
+}
