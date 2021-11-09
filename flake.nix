@@ -4,7 +4,7 @@
     nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105"; ## WARNING:  update this to match the measured node
 
     cardano-node-snapshot.url = "github:input-output-hk/cardano-node/membench";
-    cardano-node-process.url = "github:input-output-hk/cardano-node/bench-analysis";
+    cardano-node-process.url = "github:input-output-hk/cardano-node/bench/process";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
   };
