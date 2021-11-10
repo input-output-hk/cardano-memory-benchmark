@@ -32,9 +32,12 @@ let
   nVariants = length (__attrNames variantTable);
   batch-id  = "${name}-${toString nVariants}vars-${toString nIterations}runs";
 
-in (runCommand "membench-batch-${batch-id}" {
+in runCommand "membench-batch-${batch-id}" {
   preferLocalBuild = true;
   nativeBuildInputs = [ jq ];
+  passthru = {
+    inherit name batch-id variantTable nIterations;
+  };
 } ''
   mkdir -p $out/nix-support
 
@@ -64,9 +67,4 @@ in (runCommand "membench-batch-${batch-id}" {
   cat > nix-support/hydra-build-products <<EOF
   file binary-dist $out/batch.tar.gz
   EOF
-'')
-// {
-  passthru = {
-    inherit name batch-id variantTable nIterations;
-  };
-}
+''
