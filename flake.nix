@@ -61,7 +61,8 @@
       inherit (pkgs) mainnet-chain db-analyser snapshot membench batch batch-results batch-report batch-hydra-report;
     };
     hydraJobs.x86_64-linux = nixpkgs.lib.fix (s: {
-      post-process = self.packages.x86_64-linux.post-process;
+      inherit (self.packages.x86_64-linux) batch-results batch-report batch-hydra-report;
+
       batch = self.packages.x86_64-linux.batch.override { nIterations = 5; };
       batch-1 = self.packages.x86_64-linux.batch.override { nIterations = 1; };
     });
