@@ -189,7 +189,7 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1635280005,
+        "lastModified": 1636429549,
         "narHash": "sha256-N6m+flW34H54YjNEvyZEMjxiH3mp4qxUmi9EFmyGWkU=",
         "owner": "input-output-hk",
         "repo": "cardano-node",
