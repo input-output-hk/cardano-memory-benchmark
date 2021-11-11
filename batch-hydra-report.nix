@@ -6,6 +6,7 @@
 
 runCommand "batch-report-${batch.batch-id}" {
   preferLocalBuild = true;
+  buildInputs = [ jq ];
 } ''
   mkdir -p $out/nix-support
 
