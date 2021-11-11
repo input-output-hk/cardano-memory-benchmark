@@ -105,7 +105,7 @@ runCommand "membench-run-report${suffix}" {
     | { RSS:          map(.RSS) | minavgmax
       , Heap:         map(.Heap) | minavgmax
       , CentiCpuMax:  map(.CentiCpu) | max
-      , SecMutMax:   (map(.CentiMut) | max / 100)
+      , CentiMutMax:  map(.CentiMut) | max
       , SecGC:       (map(.CentiGC) | max / 100)
       , CentiBlkIO:   map(.CentiBlkIO) | max
       , flags:       "${flags}"
