@@ -12,5 +12,5 @@ runCommand "batch-${batch.name}-report" {
   mkdir -p $out/nix-support
 
   ${bash}/bin/bash ${cardano-node-process}/bench/process/process.sh \
-    render < ${batch-results} > $out
+    render < ${batch-results} > $out/FIXME.json
 ''
