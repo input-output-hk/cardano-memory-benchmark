@@ -43,9 +43,10 @@ let
     name = "chain";
     paths = map fetchpart (lib.filter f hashes);
   };
+  mainnetProtocolMagic = 764824073;
 in runCommand "chain" {} ''
   mkdir $out
   cd $out
   ln -sv ${immutable} immutable
-  echo 764824073 > protocolMagicId
+  echo ${toString mainnetProtocolMagic} > protocolMagicId
 ''
