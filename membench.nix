@@ -71,8 +71,9 @@ let
   '';
 in
 runCommand "membench-run-report${suffix}" {
-  buildInputs = [ jq hexdump ];
+  requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
+  buildInputs = [ jq hexdump ];
   input = membench.out;
 } ''
   ls -lh $input

@@ -5,6 +5,7 @@
 }:
 
 runCommand "batch-${batch.name}-results.json" {
+  requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
   nativeBuildInputs = [ jq ];
 } ''

@@ -18,6 +18,7 @@ let
 in runCommand "snapshot-generation" {
   buildInputs = [ db-analyser ];
   inherit finalEpoch snapshotSlot;
+  requiredSystemFeatures = [ "benchmark" ];
 } ''
   cp -r ${partialChain} chain
   chmod +w -R chain

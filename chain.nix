@@ -44,7 +44,9 @@ let
     paths = map fetchpart (lib.filter f hashes);
   };
   mainnetProtocolMagic = 764824073;
-in runCommand "chain" {} ''
+in runCommand "chain" {
+  requiredSystemFeatures = [ "benchmark" ];
+} ''
   mkdir $out
   cd $out
   ln -sv ${immutable} immutable

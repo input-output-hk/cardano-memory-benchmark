@@ -5,6 +5,7 @@
 }:
 
 runCommand "batch-report-${batch.batch-id}" {
+  requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
   buildInputs = [ jq ];
 } ''

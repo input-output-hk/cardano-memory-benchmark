@@ -33,6 +33,7 @@ let
   batch-id  = "${name}-${toString nVariants}vars-${toString nIterations}runs";
 
 in runCommand "membench-batch-${batch-id}" {
+  requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
   nativeBuildInputs = [ jq ];
   passthru = {
