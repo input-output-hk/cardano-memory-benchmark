@@ -7,8 +7,10 @@
     cardano-node-process.url = "github:input-output-hk/cardano-node/bench/process";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
+
+    cardano-mainnet-mirror.url = "github:input-output-hk/cardano-mainnet-mirror/nix";
   };
-  outputs = { ouroboros-network, self, nixpkgs, cardano-node-snapshot, cardano-node-process, cardano-node-measured }: let
+  outputs = { ouroboros-network, self, nixpkgs, cardano-node-snapshot, cardano-node-process, cardano-node-measured, cardano-mainnet-mirror }: let
     network = import ouroboros-network { system = "x86_64-linux"; };
     params = builtins.fromJSON (builtins.readFile ./membench_params.json);
     rtsMemSize = null;
@@ -27,7 +29,7 @@
     };
     overlay = self: super: {
       ## 0. Chain
-      mainnet-chain = self.callPackage ./chain.nix {};
+      mainnet-chain = cardano-mainnet-mirror.defaultPackage.x86_64-linux;
 
       # TODO, fix this
       #db-analyser = network.haskellPackages.ouroboros-consensus-cardano.components.exes.db-analyser;
