@@ -19,6 +19,7 @@ in runCommand "snapshot-generation" {
   buildInputs = [ db-analyser ];
   inherit finalEpoch snapshotSlot;
   requiredSystemFeatures = [ "benchmark" ];
+  meta.timeout = 16 * 3600; # 16 hours
 } ''
   cp -r ${partialChain} chain
   chmod +w -R chain
