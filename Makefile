@@ -27,3 +27,6 @@ bump-node-process: ## Update the node version used for analysis
 
 bump-node-measured: ## Update the node version under measurement
 	nix flake lock update-input cardano-node-measured
+
+reflake:
+	nix flake show --option allow-import-from-derivation true

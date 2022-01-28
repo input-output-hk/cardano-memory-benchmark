@@ -1,10 +1,10 @@
 {
   inputs = {
-    cardano-node-measured.url = "github:input-output-hk/cardano-node";
+    cardano-node-measured.url = "github:input-output-hk/cardano-node/1.33.0";
     nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105"; ## WARNING:  update this to match the measured node
 
-    cardano-node-snapshot.url = "github:input-output-hk/cardano-node/membench";
-    cardano-node-process.url = "github:input-output-hk/cardano-node/bench/process";
+    cardano-node-snapshot.url = "github:input-output-hk/cardano-node/1.33.0";
+    cardano-node-process.url = "github:input-output-hk/cardano-node/1.33.0";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
 
@@ -19,10 +19,10 @@
     limit2 = "6553M";
     variantTable = {
       baseline = "";
-      justc = "-c";
-      four  = "-H4G -M${limit2}";
-      five  = "-H4G -M${limit2} -c50";
-      six   = "-H4G -M${limit2} -c70";
+      # justc = "-c";
+      # four  = "-H4G -M${limit2}";
+      # five  = "-H4G -M${limit2} -c50";
+      # six   = "-H4G -M${limit2} -c70";
       #seven = "-H4G -M${limit2} -G3";
       #eight = "-H4G -M${limit2} -G3 -c50";
       #nine  = "-H4G -M${limit2} -G3 -c70";
