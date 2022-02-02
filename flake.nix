@@ -3,7 +3,7 @@
     cardano-node-measured.url = "github:input-output-hk/cardano-node/1.33.0";
     cardano-node-measured.inputs.nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105"; ## WARNING:  update this to match the measured node
 
-    cardano-node-snapshot.url = "github:input-output-hk/cardano-node/1.33.0";
+    cardano-node-snapshot.url = "github:input-output-hk/cardano-node/membench";
     cardano-node-snapshot.inputs.nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105";
     cardano-node-process.url = "github:input-output-hk/cardano-node/1.33.0";
     cardano-node-process.inputs.nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105";
