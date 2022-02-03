@@ -209,16 +209,15 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1640022647,
-        "narHash": "sha256-M+YnF7Zj/7QK2pu0T75xNVaX0eEeijtBH8yz+jEHIMM=",
+        "lastModified": 1643837145,
+        "narHash": "sha256-l7ouWLiyd+LzAylI+7JdRzxHJ3J3X3URvAjn54J95Rw=",
         "owner": "input-output-hk",
         "repo": "cardano-node",
-        "rev": "814df2c146f5d56f8c35a681fe75e85b905aed5d",
+        "rev": "c44a13b64429785eda0d4ad4173c3cf226f849cb",
         "type": "github"
       },
       "original": {
         "owner": "input-output-hk",
-        "ref": "1.33.0",
         "repo": "cardano-node",
         "type": "github"
       }
@@ -501,7 +500,8 @@
         "nix-tools": "nix-tools",
         "nixpkgs": [
           "cardano-node-measured",
-          "nixpkgs"
+          "haskellNix",
+          "nixpkgs-2111"
         ],
         "nixpkgs-2003": "nixpkgs-2003",
         "nixpkgs-2105": "nixpkgs-2105",
@@ -573,7 +573,8 @@
         "nix-tools": "nix-tools_3",
         "nixpkgs": [
           "cardano-node-snapshot",
-          "nixpkgs"
+          "haskellNix",
+          "nixpkgs-2105"
         ],
         "nixpkgs-2003": "nixpkgs-2003_3",
         "nixpkgs-2009": "nixpkgs-2009",
@@ -646,10 +647,7 @@
     },
     "iohkNix": {
       "inputs": {
-        "nixpkgs": [
-          "cardano-node-measured",
-          "nixpkgs"
-        ]
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "lastModified": 1633964277,
@@ -688,10 +686,7 @@
     },
     "iohkNix_3": {
       "inputs": {
-        "nixpkgs": [
-          "cardano-node-snapshot",
-          "nixpkgs"
-        ]
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
         "lastModified": 1631778944,
@@ -987,6 +982,34 @@
         "type": "indirect"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1643472818,
+        "narHash": "sha256-qzVPxKDUubYIxKRSuDl/JgzXWSmGvUVYny9SxFMfPJM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "7f65e4abd5ecaad12d2d26e4380d1a7d8edafea7",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "nixpkgs_4": {
+      "locked": {
+        "lastModified": 1643472818,
+        "narHash": "sha256-qzVPxKDUubYIxKRSuDl/JgzXWSmGvUVYny9SxFMfPJM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "7f65e4abd5ecaad12d2d26e4380d1a7d8edafea7",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
     "old-ghc-nix": {
       "flake": false,
       "locked": {
@@ -1060,7 +1083,7 @@
         "cardano-node-measured": "cardano-node-measured",
         "cardano-node-process": "cardano-node-process",
         "cardano-node-snapshot": "cardano-node-snapshot",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs_4",
         "ouroboros-network": "ouroboros-network"
       }
     },

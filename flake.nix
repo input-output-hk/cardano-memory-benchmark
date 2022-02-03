@@ -5,7 +5,7 @@
 
     cardano-node-snapshot.url = "github:input-output-hk/cardano-node/membench";
     cardano-node-snapshot.inputs.nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105";
-    cardano-node-process.url = "github:input-output-hk/cardano-node/1.33.0";
+    cardano-node-process.url = "github:input-output-hk/cardano-node";
     cardano-node-process.inputs.nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
