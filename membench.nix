@@ -15,6 +15,7 @@ let
     buildInputs = [ cardano-node-measured jq strace util-linux procps time ];
     succeedOnFailure = true;
     inherit currentIteration;
+    requiredSystemFeatures = [ "benchmark" ];
     failureHook = ''
       egrep 'ReplayFromSnapshot|ReplayedBlock|will terminate|Ringing the node shutdown|TookSnapshot|cardano.node.resources' log.json > $out/summary.json
       mv -vi log*json config.json $out/
