@@ -1,7 +1,7 @@
 { lib, bash, jq, runCommand
 , membench
 , cardano-node-process
-, name, variantTable, nIterations ? 1
+, name, variantTable, nIterations ? 5
 }:
 
 with lib;
