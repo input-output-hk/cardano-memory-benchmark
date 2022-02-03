@@ -1,0 +1,31 @@
+* =membench=, aka =cardano-memory-benchmark=
+
+This is a self-contained, single-node benchmark for Cardano mainnet chain replay.
+
+It crucially depends on:
+
+  * https://github.com/input-output-hk/cardano-mainnet-mirror, for the Cardano
+    Mainnet chain.
+  * Three pins of https://github.com/input-output-hk/cardano-node:
+    - =snapshot= :: node version which is used to take =ouroboros-network=
+      for its =db-analyser= binary, which creates ledger snapshots.
+    - =process= :: node version which is used for its =bench/process= result
+      processing and rendering scripts
+    - =measure= :: node version to actually benchmark
+
+* Usage
+
+  For now, the instructions are minimal: just run =make= & handle the fallout.
+
+  Note that you need a recent version of Nix with proper flake support (=2.5=
+  minimum, and preferably lates =2.7-pre=).
+
+* Technicalities
+*** On why this is separate from the =cardano-node= repository
+
+  The reasons are twofold:
+
+  1. It's much easier to define and use separate pins for the three essential =cardano-node=
+     versions listed above
+  2. Experimentation is easy and harmless, since the per-commit benchmarking flow of
+     =cardano-node= is undisturbed, for as long as it points to a stable version of =membench=
