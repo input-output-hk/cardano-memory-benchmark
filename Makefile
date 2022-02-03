@@ -9,10 +9,10 @@ help: ## Print documentation
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 batch-parallel: ## Parallel build of batch: NOT FOR BENCHMARKING
-	nix build .#batch --option substituters "$(SUBSTITUTERS_ALL)" --max-jobs 8
+	nix build .#hydraJobs.x86_64-linux.batch --option substituters "$(SUBSTITUTERS_ALL)" --max-jobs 8
 
-batch: ## Run a survey batch of benchmarks: 5 runs of each entry in the variantTable
-	nix build .#batch --option substituters "$(SUBSTITUTERS_ALL)" --max-jobs 1
+batch batch-1: ## Run a survey batch of benchmarks: 5 runs of each entry in the variantTable
+	nix build .#hydraJobs.x86_64-linux.$@ --option substituters "$(SUBSTITUTERS_ALL)" --max-jobs 1
 
 results: ## Same as batch, but also aggregate and do statistical processing
 	nix build .#batch-results
@@ -20,11 +20,8 @@ results: ## Same as batch, but also aggregate and do statistical processing
 report: ## Same as report, but also produce a report
 	nix build .#batch-report
 
-bump-node-process: ## Update the node version used for analysis
-	nix flake lock update-input cardano-node-process
-
-bump-node-measured: ## Update the node version under measurement
-	nix flake lock update-input cardano-node-measured
-
-reflake:
+reflake: ## Regenerate the flake.lock
 	nix flake show --option allow-import-from-derivation true
+
+cls:
+	echo -en "\ec"
