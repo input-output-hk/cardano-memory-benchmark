@@ -23,10 +23,7 @@ batch: ## Run a survey batch of benchmarks: 5 runs of each entry in the variantT
 batch-results: ## Run a batch, then perform result analysis
 	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH} -o $@
 
-batch-report: ## Run a batch, analyse and produce a report
-	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH} -o $@
-
-batch-hydra-report: ## Run a batch, analyse and produce a Hydra report
+batch-report: ## Run a batch, analyse and produce a Hydra report
 	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH} -o $@
 
 batch-1: ## A single-round benchmark run
@@ -38,11 +35,20 @@ batch-locm-report: ## Like batch, but measure node checkout in $CARDANO_NODE
 batch-locm-1: ## Like batch-local, but just a single run
 	nix build .#hydraJobs.x86_64-linux.batch-1            ${FLAGS_LOCAL_MEASURE} -o batch-1
 
+batch-locr-results: ## Like batch-results, but use local node checkout in $CARDANO_NODE for processing
+	nix build .#hydraJobs.x86_64-linux.batch-results      ${FLAGS_LOCAL_PROCESS} -o batch-results
+
 batch-locr-report: ## Like batch-report, but use local node checkout in $CARDANO_NODE for processing
 	nix build .#hydraJobs.x86_64-linux.batch-report       ${FLAGS_LOCAL_PROCESS} -o batch-report
 
-batch-locr-hydra-report: ## Like batch-hydra-report, but use local node checkout in $CARDANO_NODE for processing
-	nix build .#hydraJobs.x86_64-linux.batch-hydra-report ${FLAGS_LOCAL_PROCESS}
+flake-bump-snapshot:
+	nix flake lock --update-input cardano-node-snapshot
+
+flake-bump-measure:
+	nix flake lock --update-input cardano-node-measure
+
+flake-bump-process:
+	nix flake lock --update-input cardano-node-process
 
 reflake: ## Regenerate the flake.lock
 	nix flake show --option allow-import-from-derivation true

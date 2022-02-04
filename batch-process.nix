@@ -4,11 +4,15 @@
 , cardano-node-process
 }:
 
-runCommand "batch-${batch.name}-results.json" {
+runCommand "membench-results-${batch.batch-id}.json" {
   requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
   nativeBuildInputs = [ jq ];
 } ''
+  echo "membench | process:  processing batch ${batch.batch-id}"
+
   ${bash}/bin/bash ${cardano-node-process}/bench/process/process.sh \
     process < ${batch}/index.json > $out
+
+  cat $out
 ''

@@ -5,7 +5,7 @@
 
     cardano-node-snapshot.url = "github:input-output-hk/cardano-node/membench";
     cardano-node-snapshot.inputs.nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105";
-    cardano-node-process.url = "github:input-output-hk/cardano-node";
+    cardano-node-process.url = "github:input-output-hk/cardano-node/membench-report";
     cardano-node-process.inputs.nixpkgs.follows = "cardano-node-measured/haskellNix/nixpkgs-2105";
     ouroboros-network.url = "github:input-output-hk/ouroboros-network";
     ouroboros-network.flake = false;
@@ -49,23 +49,25 @@
 
       ## 4. Run batch:  profiles X iterations
       inherit cardano-node-process;
-      batch = self.callPackage ./batch.nix { inherit name variantTable; };
+      batch = self.callPackage ./batch.nix
+        { inherit name variantTable;
+          inherit (cardano-node-measured) shortRev;
+        };
 
       ## 5. Data aggregation and statistics
-      batch-results      = self.callPackage ./batch-process.nix {};
+      batch-results = self.callPackage ./batch-process.nix {};
 
       ## 6. Report generation
-      batch-report       = self.callPackage ./batch-render.nix {};
-      batch-hydra-report = self.callPackage ./batch-hydra-report.nix {};
+      batch-report = self.callPackage ./batch-report.nix {};
     };
   in {
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; overlays = [ overlay ]; };
     in {
-      inherit (pkgs) mainnet-chain db-analyser snapshot membench batch batch-results batch-report batch-hydra-report;
+      inherit (pkgs) mainnet-chain db-analyser snapshot membench batch batch-results batch-report;
     };
     hydraJobs.x86_64-linux = nixpkgs.lib.fix (s: {
-      inherit (self.packages.x86_64-linux) snapshot batch-results batch-report batch-hydra-report;
+      inherit (self.packages.x86_64-linux) snapshot batch-results batch-report;
 
       batch = self.packages.x86_64-linux.batch.override { nIterations = 5; };
       batch-1 = self.packages.x86_64-linux.batch.override { nIterations = 1; };
