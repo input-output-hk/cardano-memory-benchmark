@@ -15,30 +15,33 @@ help: ## Print documentation
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 batch-prebuild: ## Fast, parallel prebuild of batch dependencies: NOT FOR BENCHMARKING
-	nix build .#hydraJobs.x86_64-linux.batch-1            ${FLAGS_BASE} --max-jobs 8
+	nix build .#hydraJobs.x86_64-linux.batch-1            ${FLAGS_BASE} --max-jobs 8 -o batch-1
 
 batch: ## Run a survey batch of benchmarks: 5 runs of each entry in the variantTable
-	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH}
+	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH} -o $@
 
 batch-results: ## Run a batch, then perform result analysis
-	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH}
+	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH} -o $@
 
 batch-report: ## Run a batch, analyse and produce a report
-	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH}
+	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH} -o $@
+
+batch-hydra-report: ## Run a batch, analyse and produce a Hydra report
+	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH} -o $@
 
 batch-1: ## A single-round benchmark run
-	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH}
+	nix build .#hydraJobs.x86_64-linux.$@                 ${FLAGS_BENCH} -o $@
 
-batch-local-measure: ## Like batch, but measure node checkout in $CARDANO_NODE
-	nix build .#hydraJobs.x86_64-linux.batch-report       ${FLAGS_LOCAL_MEASURE}
+batch-locm-report: ## Like batch, but measure node checkout in $CARDANO_NODE
+	nix build .#hydraJobs.x86_64-linux.batch-report       ${FLAGS_LOCAL_MEASURE} -o batch-report
 
-batch-local-1: ## Like batch-local, but just a single run
-	nix build .#hydraJobs.x86_64-linux.batch-1            ${FLAGS_LOCAL_MEASURE}
+batch-locm-1: ## Like batch-local, but just a single run
+	nix build .#hydraJobs.x86_64-linux.batch-1            ${FLAGS_LOCAL_MEASURE} -o batch-1
 
-batch-local-report: ## Like batch-report, but use local node checkout in $CARDANO_NODE for processing
-	nix build .#hydraJobs.x86_64-linux.batch-report       ${FLAGS_LOCAL_PROCESS}
+batch-locr-report: ## Like batch-report, but use local node checkout in $CARDANO_NODE for processing
+	nix build .#hydraJobs.x86_64-linux.batch-report       ${FLAGS_LOCAL_PROCESS} -o batch-report
 
-batch-local-hydra-report: ## Like batch-hydra-report, but use local node checkout in $CARDANO_NODE for processing
+batch-locr-hydra-report: ## Like batch-hydra-report, but use local node checkout in $CARDANO_NODE for processing
 	nix build .#hydraJobs.x86_64-linux.batch-hydra-report ${FLAGS_LOCAL_PROCESS}
 
 reflake: ## Regenerate the flake.lock
