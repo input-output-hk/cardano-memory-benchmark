@@ -1,8 +1,7 @@
 { lib, bash, jq, runCommand
 , membench
-, shortRev
-, cardano-node-process
-, name, variantTable, nIterations ? 5
+, inputs, cardano-node-process
+, variantTable, nIterations ? 5
 }:
 
 with lib;
@@ -31,14 +30,14 @@ let
       (mapAttrs variantIterationsShell allVariants);
 
   nVariants = length (__attrNames variantTable);
-  batch-id  = "${name}-${shortRev}-${toString nVariants}vars-${toString nIterations}runs";
+  batch-id  = "${inputs.cardano-node-measured.rev}-${toString nVariants}vars-${toString nIterations}runs";
 
 in runCommand "membench-${batch-id}" {
   requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
   nativeBuildInputs = [ jq ];
   passthru = {
-    inherit name batch-id variantTable nIterations;
+    inherit batch-id variantTable nIterations;
   };
 } ''
   mkdir -p $out/nix-support

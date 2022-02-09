@@ -1,6 +1,6 @@
 { runCommand, lib
 , jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump
-, cardano-node-snapshot, cardano-node-measured
+, inputs, cardano-node-snapshot, cardano-node-measured
 , rtsflags, rtsMemSize, currentIteration ? null
 , suffix ? ""
 }:
@@ -10,7 +10,7 @@ let
   topology = { Producers = []; };
   topologyPath = builtins.toFile "topology.json" (builtins.toJSON topology);
   inVM = false;
-  membench = runCommand "membench${suffix}" {
+  membench = runCommand "membench-node-${inputs.cardano-node-measured.rev}${suffix}" {
     outputs = [ "out" "chain" ];
     buildInputs = [ cardano-node-measured jq strace util-linux procps time ];
     succeedOnFailure = true;
@@ -56,19 +56,40 @@ let
         }
       ]
       | .defaultScribes = .defaultScribes + [ [ "FileSK", "log.json" ] ]
-      ' ${cardano-node-snapshot}/configuration/cardano/mainnet-config.json > config.json
+      '   ${cardano-node-snapshot}/configuration/cardano/mainnet-config.json > config.json
     cp -v ${cardano-node-snapshot}/configuration/cardano/*-genesis.json .
-    command time -f %M -o $out/highwater cardano-node +RTS -s$out/rts.dump ${flags} -RTS run --database-path chain/ --config config.json --topology ${topologyPath} --shutdown-on-slot-synced 2000 2>$out/stderr
+
+    args=( +RTS -s$out/rts.dump
+                ${flags}
+           -RTS
+           run
+           --database-path           chain/
+           --config                  config.json
+           --topology                ${topologyPath}
+           --shutdown-on-slot-synced 200000
+         )
+    command time -f %M -o $out/highwater \
+      cardano-node "''${args[@]}" 2>$out/stderr
     #sleep 600
     #kill -int $!
+
     pwd
     df -h
     free -m
+
     egrep 'ReplayFromSnapshot|ReplayedBlock|will terminate|Ringing the node shutdown|TookSnapshot|cardano.node.resources' log.json > $out/summary.json
+
     ls -ltrh chain/ledger/
     mv -vi log*json config.json $out/
     mv chain $chain
     rm $out/nix-support/custom-failed || true
+
+    ln -s ${snapshot} $out/chaindb
+    args=( --arg             measuredNodeRev  ${inputs.cardano-node-measured.rev}
+         )
+    jq '{ measuredNodeRev:  $measuredNodeRev
+        }
+       ' "''${args[@]}" > $out/run-info.json
   '';
 in
 runCommand "membench-run-report${suffix}" {
@@ -112,7 +133,7 @@ runCommand "membench-run-report${suffix}" {
       , CentiBlkIO:   map(.CentiBlkIO) | max
       , flags:       "${flags}"
       , chain:       { startSlot: ${toString snapshot.snapshotSlot}
-                     , stopFile:  ${toString snapshot.finalEpoch}
+                     , stopFile:  ${toString snapshot.finalChunkNo}
                      }
       , totaltime:   '$totaltime'
       , failed:      '$FAILED'

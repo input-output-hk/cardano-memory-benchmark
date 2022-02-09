@@ -1,6 +1,6 @@
 { lib, bash, jq, runCommand
 , membench
-, cardano-node-process
+, inputs, cardano-node-process
 , batch
 , batch-results
 , node-config-name ? "baseline"

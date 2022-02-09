@@ -12,12 +12,11 @@
 
     cardano-mainnet-mirror.url = "github:input-output-hk/cardano-mainnet-mirror/nix";
   };
-  outputs = { ouroboros-network, self, nixpkgs, cardano-node-snapshot, cardano-node-process, cardano-node-measured, cardano-mainnet-mirror }: let
+  outputs = { ouroboros-network, self, nixpkgs, cardano-node-snapshot, cardano-node-process, cardano-node-measured, cardano-mainnet-mirror }@inputs: let
     network = import ouroboros-network { system = "x86_64-linux"; };
     params = builtins.fromJSON (builtins.readFile ./membench_params.json);
     rtsMemSize = null;
     rtsflags = params.rtsFlags;
-    name = "default";
     limit2 = "6553M";
     variantTable = {
       baseline = "";
@@ -30,6 +29,9 @@
       #nine  = "-H4G -M${limit2} -G3 -c70";
     };
     overlay = self: super: {
+      ## Do not let this overlay escape -- exposure to other flakes will break down due to inputs being inherited.
+      inherit inputs;
+
       ## 0. Chain
       mainnet-chain = cardano-mainnet-mirror.defaultPackage.x86_64-linux;
 
@@ -39,7 +41,10 @@
       ## 1. Ledger snapshot
       inherit cardano-node-snapshot;
       db-analyser = cardano-node-snapshot.packages.x86_64-linux.db-analyser;
-      snapshot = self.callPackage ./snapshot-generation.nix { chain = self.mainnet-chain; };
+      snapshot = self.callPackage ./snapshot-generation.nix
+        { chain = self.mainnet-chain;
+          shelleyGenesisHash = "1a3be38bcbb7911969283716ad7aa550250226b76a61fc51cc9a9a35d9276d81";
+        };
 
       ## 2. Node under measurement
       cardano-node-measured = cardano-node-measured.packages.x86_64-linux.cardano-node;
@@ -49,10 +54,7 @@
 
       ## 4. Run batch:  profiles X iterations
       inherit cardano-node-process;
-      batch = self.callPackage ./batch.nix
-        { inherit name variantTable;
-          inherit (cardano-node-measured) shortRev;
-        };
+      batch = self.callPackage ./batch.nix { inherit variantTable; };
 
       ## 5. Data aggregation and statistics
       batch-results = self.callPackage ./batch-process.nix {};
