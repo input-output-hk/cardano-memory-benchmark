@@ -1,4 +1,4 @@
-{ runCommand, db-analyser, chain, cardano-node-snapshot }:
+{ runCommand, db-analyser, chain, cardano-node-snapshot, lib }:
 
 let
   chainRange = builtins.fromJSON (builtins.readFile ./chain-range.json);
@@ -15,16 +15,24 @@ let
     done
     cp ${chain'}/immutable/0${toString finalEpoch}.{chunk,primary,secondary} immutable
   '';
+  filter = name: type: let
+    baseName = baseNameOf (toString name);
+    sansPrefix = lib.removePrefix (toString cardano-node-snapshot) name;
+  in
+  builtins.trace sansPrefix (
+    sansPrefix == "/configuration" ||
+    (lib.hasPrefix "/configuration/cardano" sansPrefix));
 in runCommand "snapshot-generation" {
   buildInputs = [ db-analyser ];
   inherit finalEpoch snapshotSlot;
   requiredSystemFeatures = [ "benchmark" ];
   meta.timeout = 16 * 3600; # 16 hours
+  genesisFiles = lib.cleanSourceWith { inherit filter; src = builtins.unsafeDiscardStringContext cardano-node-snapshot; name = "genesis-files"; };
 } ''
   cp -r ${partialChain} chain
   chmod +w -R chain
 
-  cp ${cardano-node-snapshot}/configuration/cardano/*-genesis.json .
+  cp $genesisFiles/configuration/cardano/*-genesis.json .
 
   { while true; do sleep 3600; echo not silent; done } &
 
