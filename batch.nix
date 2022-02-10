@@ -1,4 +1,4 @@
-{ lib, bash, jq, runCommand
+{ lib, bash, jq, zstd, runCommand
 , membench
 , inputs, cardano-node-process
 , variantTable, nIterations ? 5
@@ -35,7 +35,7 @@ let
 in runCommand "membench-${batch-id}" {
   requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
-  nativeBuildInputs = [ jq ];
+  nativeBuildInputs = [ jq zstd ];
   passthru = {
     inherit batch-id variantTable nIterations;
   };
@@ -55,17 +55,19 @@ in runCommand "membench-${batch-id}" {
 
   ## 2. Package
   cd $out
-  tar -cf batch.tar     \
+
+  tarname=membench-${batch-id}
+  tar -cf $tarname.tar.zst \
      index.json         \
      */*.json           \
      */input/*.json     \
      */input/highwater  \
      */input/rts.dump   \
-     */input/stderr
-  gzip -9v batch.tar
+     */input/stderr     \
+     --zstd
 
   ## 3. Mark for Hydra publishing
   cat > nix-support/hydra-build-products <<EOF
-  file binary-dist $out/batch.tar.gz
+  file binary-dist $out/$tarname.tar.zst
   EOF
 ''
