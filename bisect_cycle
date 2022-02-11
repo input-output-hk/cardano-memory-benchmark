@@ -1,8 +1,8 @@
 #!/bin/sh
 
-lastResult=$(jq < result/refined.json .failed)
+lastResult=$(jq < result/refined.json .pass)
 
-if [ x$lastResult = xfalse ]; then
+if [ x$lastResult = xtrue ]; then
   nix-store -r $(readlink ./result) --add-root pass --indirect
   cp -f result/refined.json pass.json
 else

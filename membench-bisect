@@ -26,8 +26,8 @@ while true; do
 
   time nix-build -A membench --argstr rtsMemSize ${nextLimit}M -o result-${nextLimit} -Q --option timeout ${buildTimeout}
 
-  lastResult=$(jq .failed "result-${nextLimit}/refined.json")
-  if [ x$lastResult = xfalse ]; then
+  lastResult=$(jq .pass "result-${nextLimit}/refined.json")
+  if [ x$lastResult = xtrue ]; then
     outcome=pass
     last_pass=$nextLimit
   else

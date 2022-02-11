@@ -109,11 +109,11 @@ runCommand "membench-run-report${suffix}" {
   highwater=$(cat $input/highwater | cut -d' ' -f6)
 
   if [ -f $input/nix-support/custom-failed ]; then
-    export FAILED=true
+    export PASS=false
     mkdir $out/nix-support -p
     cp $input/nix-support/custom-failed $out/nix-support/custom-failed
   else
-    export FAILED=false
+    export PASS=true
   fi
 
   jq '
@@ -136,6 +136,6 @@ runCommand "membench-run-report${suffix}" {
                      , stopFile:  ${toString snapshot.finalChunkNo}
                      }
       , totaltime:   '$totaltime'
-      , failed:      '$FAILED'
+      , pass:        '$PASS'
       }' --slurp input/summary.json > refined.json
 ''
