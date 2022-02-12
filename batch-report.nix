@@ -7,7 +7,7 @@
 }:
 
 let
-  report-id = "${batch.batch-id}-config-${node-config-name}";
+  report-id = "${batch.batch-id}-config-${node-config-name}-report-${inputs.cardano-node-process.shortRev}";
 in
 runCommand "membench-report-${report-id}" {
   requiredSystemFeatures = [ "benchmark" ];

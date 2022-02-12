@@ -4,7 +4,7 @@
 , cardano-node-process
 }:
 
-runCommand "membench-results-${batch.batch-id}.json" {
+runCommand "membench-results-${batch.batch-id}-process-${inputs.cardano-node-process.shortRev}.json" {
   requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
   nativeBuildInputs = [ jq ];
