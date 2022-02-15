@@ -1,6 +1,7 @@
 { lib, bash, runCommand, jq
 , membench
 , batch
+, inputs
 , cardano-node-process
 }:
 
