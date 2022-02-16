@@ -11,7 +11,6 @@ let
   topologyPath = builtins.toFile "topology.json" (builtins.toJSON topology);
   inVM = false;
   membench = runCommand "membench-node-${inputs.cardano-node-measured.rev}${suffix}" {
-    outputs = [ "out" "chain" ];
     buildInputs = [ cardano-node-measured jq strace util-linux procps time ];
     succeedOnFailure = true;
     inherit currentIteration;
@@ -19,7 +18,7 @@ let
     failureHook = ''
       egrep 'ReplayFromSnapshot|ReplayedBlock|will terminate|Ringing the node shutdown|TookSnapshot|cardano.node.resources' log.json > $out/summary.json
       mv -vi log*json config.json $out/
-      mv chain $chain/
+      mv chain $out/
       echo $exitCode > $out/nix-support/custom-failed
       exit 0
     '';
@@ -81,7 +80,6 @@ let
 
     ls -ltrh chain/ledger/
     mv -vi log*json config.json $out/
-    mv chain $chain
     rm $out/nix-support/custom-failed || true
 
     ln -s ${snapshot} $out/chaindb
