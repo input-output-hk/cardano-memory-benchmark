@@ -72,7 +72,6 @@
       inherit (self.packages.x86_64-linux) snapshot batch-results batch-report;
 
       batch = self.packages.x86_64-linux.batch.override { nIterations = 5; };
-      batch-1 = self.packages.x86_64-linux.batch.override { nIterations = 1; };
     });
   };
 }
