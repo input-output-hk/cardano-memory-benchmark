@@ -68,7 +68,7 @@ let
            --shutdown-on-slot-synced 200000
          )
     command time -f %M -o $out/highwater \
-      cardano-node "''${args[@]}" 2>$out/stderr
+      cardano-node "''${args[@]}" 2>$out/stderr || true
     #sleep 600
     #kill -int $!
 
