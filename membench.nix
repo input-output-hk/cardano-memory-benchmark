@@ -1,7 +1,12 @@
 { runCommand, lib
-, jq, snapshot, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump
+, jq, strace, util-linux, e2fsprogs, gnugrep, procps, time, hexdump
+## Code
 , inputs, cardano-node-snapshot, cardano-node-measured
-, rtsflags, rtsMemSize, currentIteration ? null
+## Parameters
+, snapshot
+, rtsflags, rtsMemSize
+## Iteration & nomenclature
+, currentIteration ? null
 , suffix ? ""
 }:
 
@@ -10,7 +15,8 @@ let
   topology = { Producers = []; };
   topologyPath = builtins.toFile "topology.json" (builtins.toJSON topology);
   inVM = false;
-  membench = runCommand "membench-node-${inputs.cardano-node-measured.rev}${suffix}" {
+  ident = "node-${inputs.cardano-node-measured.rev}${suffix}";
+  membench = runCommand "membench-run-${ident}" {
     buildInputs = [ cardano-node-measured jq strace util-linux procps time ];
     succeedOnFailure = true;
     inherit currentIteration;
@@ -54,7 +60,10 @@ let
           }
         }
       ]
-      | .defaultScribes = .defaultScribes + [ [ "FileSK", "log.json" ] ]
+      | .defaultScribes =
+        .defaultScribes + [ [ "FileSK", "log.json" ] ]
+      | .options.mapBackends =
+         { "cardano.node.resources": [ "KatipBK" ] }
       '   ${cardano-node-snapshot}/configuration/cardano/mainnet-config.json > config.json
     cp -v ${cardano-node-snapshot}/configuration/cardano/*-genesis.json .
 
@@ -89,7 +98,7 @@ let
        ' "''${args[@]}" > $out/run-info.json
   '';
 in
-runCommand "membench-run-report${suffix}" {
+runCommand "membench-run-${suffix}-postproc" {
   requiredSystemFeatures = [ "benchmark" ];
   preferLocalBuild = true;
   buildInputs = [ jq hexdump ];
