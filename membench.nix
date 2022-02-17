@@ -78,7 +78,6 @@ let
 
     egrep 'ReplayFromSnapshot|ReplayedBlock|will terminate|Ringing the node shutdown|TookSnapshot|cardano.node.resources' log.json > $out/summary.json
 
-    ls -ltrh chain/ledger/
     mv -vi log*json config.json $out/
     rm $out/nix-support/custom-failed || true
 
